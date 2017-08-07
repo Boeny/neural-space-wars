@@ -1,0 +1,26 @@
+{
+  "name": "neural-space-wars",
+  "version": "0.0.1",
+  "description": "classic Space Wars with brainjs\u001b[D\u001b[Ds.d\u001b[D\u001b[D\u001b[D.\u001b[2~j\u001b[2~ff\u001b[D\u001b[Dd\u001b[2ff\u001b[D\u001b[Df\u001b[ddf\u001b[D\u001b[D\u001b[D0\u001b[2js",
+  "scripts": {
+    "dev": "webpack --env=dev",
+    "server": "webpack-dev-server --env=server --open",
+    "prod": "webpack --env=prod",
+    "pages": "webpack --env=gitpages"
+  },
+  "keywords": [
+    "space-wars\u001b[D\u001b[D\u001b[D\u001b[",
+    "\u001b[C\u001b[C\u001b[C\u001b[C",
+    "brain",
+    "neural"
+  ],
+  "author": "boeny",
+  "license": "MIT",
+  
+  "devDependencies": {
+    "uglifyjs-webpack-plugin": "^1.0.0-beta.1",
+    "webpack": "^3.4.1",
+    "webpack-dev-server": "^2.6.1",
+    "webpack-merge": "^4.1.0"
+  }
+}
