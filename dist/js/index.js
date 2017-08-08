@@ -1,1 +1,762 @@
-!function(t){function e(i){if(n[i])return n[i].exports;var s=n[i]={i:i,l:!1,exports:{}};return t[i].call(s.exports,s,s.exports,e),s.l=!0,s.exports}var n={};e.m=t,e.c=n,e.d=function(t,n,i){e.o(t,n)||Object.defineProperty(t,n,{configurable:!1,enumerable:!0,get:i})},e.n=function(t){var n=t&&t.__esModule?function(){return t.default}:function(){return t};return e.d(n,"a",n),n},e.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},e.p="",e(e.s=1)}([function(t,e){var n;n=function(){return this}();try{n=n||Function("return this")()||(0,eval)("this")}catch(t){"object"==typeof window&&(n=window)}t.exports=n},function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0}),function(t){var e=n(2);t.Vector2=e.a.Vector2,e.a.ready([n(6),n(7)],.5)}.call(e,n(0))},function(t,e,n){"use strict";(function(t){var i=n(3),s=n(5);i.a.ready=function(e,n){if(e){for(var o={},r=0;r<e.length;r++){let t=e[r],n=Object.keys(t)[0];o[n.toLowerCase()]=new t[n]}t.onload=function(){var t=new i.a(n),e=[],r=new s.a(t);for(var a in o){let n=o[a];if(n.renderer=t,n.controls=r,n.Start&&n.Start(o),n.render||n.Update){let t;n.render&&!n.Update&&(t=n.render.bind(n)),!n.render&&n.Update&&(t=n.Update.bind(n)),n.render&&n.Update&&(t=(()=>{n.Update(),n.render()})),e.push(t),n.render&&n.render()}}r.Bind(o),function n(){requestAnimationFrame(n),t.clear();for(var i=0;i<e.length;i++)e[i]()}()}}},e.a=i.a}).call(e,n(0))},function(t,e,n){"use strict";(function(t){var i=n(4);class s{constructor(t){this.DOM=document.createElement("canvas"),document.body.appendChild(this.DOM),this.multiplier=t,this.setSize(),this.canvas=this.DOM.getContext("2d")}setSize(){this.DOM.width=this.multiplier*t.innerWidth,this.DOM.height=this.multiplier*t.innerHeight}get width(){return this.DOM.width}get height(){return this.DOM.height}addEvent(t,e){this.DOM.addEventListener(t,e)}createData(t,e){return this.canvas.createImageData(t||this.width,e||this.height)}renderData(t,e,n){this.canvas.putImageData(t,e||0,n||0)}clear(){this.renderData(this.createData())}getColorAtIndex(t,e){return{r:t.data[e]||0,g:t.data[e+1]||0,b:t.data[e+2]||0,a:t.data[e+3]||0}}setColorAtIndex(t,e,n){n=n||{},t.data[e]=void 0===n.r?0:n.r,t.data[e+1]=void 0===n.g?0:n.g,t.data[e+2]=void 0===n.b?0:n.b,t.data[e+3]=void 0===n.a?255:n.a}getColorAt(t,e,n){return this.getColorAtIndex(t,4*(e+n*this.DOM.width))}setColorAt(t,e,n,i){var s=4*(e+n*this.DOM.width);this.setColorAtIndex(t,s,i)}setColor(t){t&&("object"!=typeof t&&(t={fill:t,stroke:t}),t.stroke&&(this.canvas.strokeStyle=t.stroke),t.fill&&(this.canvas.fillStyle=t.fill))}render(){this.canvas.closePath(),this.canvas.stroke()}drawLine(t,e,n){n&&(this.canvas.lineWidth=n),this.canvas.beginPath(),this.canvas.moveTo(t.x+.5,t.y+.5),this.canvas.lineTo(e.x+.5,e.y+.5),this.render()}drawLineTo(t,e,n){e&&(this.init_point=e),this.drawLine(this.init_point,t,n),this.init_point=t}drawLines(t,e){if(t.length){this.init_point=t[0];for(var n=1;n<t.length;n++)this.drawLineTo(t[n],null,e)}}drawRect(t,e){this.canvas.beginPath(),this.canvas.fillRect(t.x+.5,t.y+.5,e.x+.5,e.y+.5),this.render()}drawPoly(t,e){t.push(t[0]),this.drawLines(t,e)}drawCircle(t,e,n){this.canvas.beginPath(),this.canvas.arc(t.x,t.y,e,0,2*Math.PI,!1),this.canvas.fill(),n&&(this.canvas.lineWidth=n),this.render()}drawText(t,e,n){n&&(this.canvas.font=n),this.canvas.fillText(t,e.x,e.y)}drawTexts(t){for(var e=0;e<t.length;e++){let n=t[e];this.drawText(n[0],n[1],n[2])}}}s.Vector2=i.a,e.a=s}).call(e,n(0))},function(t,e,n){"use strict";class i{constructor(t,e){this.x=t||0,this.y=e||0}clone(){return new i(this.x,this.y)}check(t){return t?t instanceof Array?new i(t[0],t[1]):"object"!=typeof t?new i(t,t):t:new i}add(t){return t=this.check(t),this.x+=t.x,this.y+=t.y,this}sub(t){return t=this.check(t),this.x-=t.x,this.y-=t.y,this}mult(t){return t=this.check(t),this.x*=t.x,this.y*=t.y,this}normalize(){return this.mult(1/this.length),this}equals(t){return this.x==t.x&&this.y==t.y}get sqrLength(){return this.x*this.x+this.y*this.y}get length(){return Math.sqrt(this.sqrLength)}toString(){return"("+this.x+", "+this.y+")"}rotate(t,e){let n=this.sub(t).length;this.normalize();let i=Math.cos(e),s=Math.sin(e);return this.x=i*this.x-s*this.y,this.y=s*this.x+i*this.y,this.mult(n).add(t)}}e.a=i},function(t,e,n){"use strict";(function(t){t.merge=function(t,e){t||(t={});for(var n=Object.keys(e||{}),i=0;i<n.length;i++)t[n[i]]=e[n[i]];return t};var n={enabled:!1,enableKeys:!0,enableMouse:!0,enableTouch:!0,keys:{SPACE:32,UP:38,DOWN:40,LEFT:37,RIGHT:39,W:87,A:65,S:83,D:68,CTRL:!1},mouse:{LEFT:0,WHEEL:1,MIDDLE:1,RIGHT:2},handlers:{keydown:"onKeyDown",keyup:"onKeyUp",mousemove:"onMouseMove",mousedown:"onMouseDown",mouseup:"onMouseUp",click:"onClick",wheel:"onMouseWheel",contextmenu:"onContextMenu",touchstart:"onTouchStart",touchend:"onTouchEnd",touchmove:"onTouchMove"}};class i{constructor(t){merge(this,n),this.renderer=t,document.addEventListener("pointerlockchange",t=>this.onPointerLockingChange(t),!1),document.addEventListener("mozpointerlockchange",t=>this.onPointerLockingChange(t),!1),document.addEventListener("webkitpointerlockchange",t=>this.onPointerLockingChange(t),!1),document.addEventListener("pointerlockerror",t=>this.onPointerLockingError(t),!1),document.addEventListener("mozpointerlockerror",t=>this.onPointerLockingError(t),!1),document.addEventListener("webkitpointerlockerror",t=>this.onPointerLockingError(t),!1)}Bind(e){for(var n in e){let t=e[n];for(let e in this.handlers){let n=this.handlers[e];t[n]&&document.body.addEventListener(e,e=>{this.enabled&&(this.keys.CTRL=e.ctrlKey,this.eventHandler(e,t,n))},!1)}}t.addEventListener("resize",()=>{this.renderer.setSize()},!1)}eventHandler(t,e,n){var i=e[n].bind(e);switch(t.preventDefault(),t.stopPropagation(),n){case"onKeyDown":case"onKeyUp":if(!this.enableKeys)return;return i(t.keyCode);case"onMouseMove":if(!this.enableMouse)return;return i(new THREE.Vector2(t.clientX,t.clientY),new THREE.Vector2(t.movementX||t.mozMovementX||t.webkitMovementX||0,t.movementY||t.mozMovementY||t.webkitMovementY||0));case"onMouseWheel":if(!this.enableMouse)return;return i(t.deltaY);case"onClick":case"onMouseUp":case"onMouseDown":if(!this.enableMouse)return;return i(t.button,new THREE.Vector2(t.clientX,t.clientY));case"onTouchStart":case"onTouchMove":case"onTouchEnd":if(!this.enableTouch)return;let e=new Array(t.touches.length);for(var s=0;s<e.length;s++)e[s]=new THREE.Vector2(t.touches[s].pageX,t.touches[s].pageY);return i(e);default:return i()}}onPointerLockingError(){}onPointerLockingChange(){}lockPointer(t){let e=t.requestPointerLock||t.mozRequestPointerLock||t.webkitRequestPointerLock;e&&e()}isPointerLocked(t){return document.pointerLockElement===t||document.mozPointerLockElement===t||document.webkitPointerLockElement===t}}e.a=i}).call(e,n(0))},function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});class i{constructor(){this.radius=10,this.oldPos=null,this.oldAng=null,this.points=[],this.velocity=new Vector2,this.angularVelocity=Math.PI/90}Start(t){this.position=new Vector2(this.renderer.width/2-100,this.renderer.height/2),this.rotation=0,this.getPoints(),this.controls.enabled=!0}getPoints(){let t=null!==this.oldPos&&this.position.equals(this.oldPos),e=null!==this.oldAng&&this.rotation==this.oldAng;if(t&&e)return this.points;if(t||(this.points=[this.position.clone().add([0,-10]),this.position.clone().add([-5,10]),this.position.clone().add([5,10])],this.oldPos=this.position.clone()),!e){for(var n=0;n<this.points.length;n++)this.points[n].rotate(this.position,this.rotation-this.oldAng);this.oldAng=this.rotation}return this.points}Update(){this.isDestroyed||this.position.add(this.velocity)}render(){this.isDestroyed||(this.renderer.setColor("white"),this.renderer.drawPoly(this.getPoints()))}destroy(){this.isDestroyed=!0}onKeyDown(t){switch(t){case this.controls.keys.UP:case this.controls.keys.W:this.velocity.y+=.5;break;case this.controls.keys.LEFT:case this.controls.keys.A:this.rotation-=this.angularVelocity;break;case this.controls.keys.RIGHT:case this.controls.keys.D:this.rotation+=this.angularVelocity}}}e.Ship=i},function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});class i{constructor(){this.radius=10,this.mass=1,this.gravity=!0}Start(t){this.position=new Vector2(this.renderer.width/2,this.renderer.height/2),this.objects=[];for(var e in t)t[e].velocity&&this.objects.push(t[e])}Update(){if(this.gravity){for(var t,e,n,i,s,o,r=[],a=0;a<this.objects.length;a++)t=this.objects[a],(i=(n=(e=this.position.clone().sub(t.position)).length)-(this.radius+(t.radius||0)))<=0?(t.destroy(),r.push(a)):(i-(o=(s=e.clone().normalize()).clone().mult(this.mass/n)).length<=0&&(o=s.clone().mult(n-this.radius)),t.velocity.add(o));for(a=0;a<r.length;a++)this.objects.splice(r[a],1)}}render(){this.renderer.setColor("white"),this.renderer.drawCircle(this.position,this.radius)}}e.Star=i}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_canvas__ = __webpack_require__(2);
+
+
+
+global.Vector2 = __WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].Vector2;
+
+__WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].ready(
+	[
+		__webpack_require__(6),
+		__webpack_require__(7)
+	],
+	0.5
+);
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__canvas__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__controls__ = __webpack_require__(5);
+
+
+
+/**
+ * @prop {Array} models [ {className: class}, ... ]
+ * @prop {Number} width of the canvas
+ * @prop {Number} height of the canvas
+ */
+__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models, multiplier){
+	if (!models) return;
+	
+	var objects = {};
+	
+	for (var i = 0; i < models.length; i++){
+		let obj = models[i];// {className: class}
+		let className = Object.keys(obj)[0];
+		objects[className.toLowerCase()] = new obj[className]();
+	}
+	
+	global.onload = function(){
+		var renderer = new __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */](multiplier);
+		var updates = [];
+		var controls = new __WEBPACK_IMPORTED_MODULE_1__controls__["a" /* default */](renderer);
+		
+		for (var name in objects){
+			let obj = objects[name];
+			obj.renderer = renderer;
+			obj.controls = controls;
+			
+			if (obj.Start) obj.Start(objects);
+			
+			if (obj.render || obj.Update){
+				let upd;
+				
+				if (obj.render && !obj.Update) upd = obj.render.bind(obj);
+				
+				if (!obj.render && obj.Update) upd = obj.Update.bind(obj);
+				
+				if (obj.render && obj.Update) upd = () => {
+					obj.Update();
+					obj.render();
+				};
+				
+				updates.push(upd);
+				if (obj.render) obj.render();
+			}
+		}
+		
+		controls.Bind(objects);
+		
+		(function render(){
+			requestAnimationFrame(render);
+			renderer.clear();
+			
+			for (var i = 0; i < updates.length; i++){
+				updates[i]();
+			}
+		})();
+	};
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */]);
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__vector2__ = __webpack_require__(4);
+
+
+class Canvas
+{
+	constructor(mult){
+		this.DOM = document.createElement('canvas');
+		document.body.appendChild(this.DOM);
+		
+		this.multiplier = mult;
+		this.setSize();
+		
+		this.canvas = this.DOM.getContext('2d');
+	}
+	
+	setSize(){
+		this.DOM.width = this.multiplier * global.innerWidth;
+		this.DOM.height = this.multiplier * global.innerHeight;
+	}
+	
+	get width(){
+		return this.DOM.width;
+	}
+	get height(){
+		return this.DOM.height;
+	}
+	
+	addEvent(event, handler){
+		this.DOM.addEventListener(event, handler);
+	}
+	
+	createData(w,h){
+		return this.canvas.createImageData(w || this.width, h || this.height);
+	}
+	renderData(img, x,y){
+		this.canvas.putImageData(img, x || 0, y || 0);
+	}
+	clear(){
+		this.renderData(this.createData());
+	}
+	
+	getColorAtIndex(img,i){
+		return {
+			r: img.data[i] || 0,
+			g: img.data[i+1] || 0,
+			b: img.data[i+2] || 0,
+			a: img.data[i+3] || 0
+		};
+	}
+	setColorAtIndex(img,i,c){
+		c = c || {};
+		
+		img.data[i] = c.r === undefined ? 0 : c.r;
+		img.data[i+1] = c.g === undefined ? 0 : c.g;
+		img.data[i+2] = c.b === undefined ? 0 : c.b;
+		img.data[i+3] = c.a === undefined ? 255 : c.a;
+	}
+	
+	getColorAt(img, x,y){
+		return this.getColorAtIndex(img, 4*(x + y * this.DOM.width));
+	}
+	setColorAt(p, x,y, c){
+		var i = 4*(x + y * this.DOM.width);
+		this.setColorAtIndex(p,i,c);
+	}
+	
+	//--------------------------------------
+	
+	setColor(color){
+		if (!color) return;
+		if (typeof color != 'object') color = {fill: color, stroke: color};
+		if (color.stroke) this.canvas.strokeStyle = color.stroke;
+		if (color.fill) this.canvas.fillStyle = color.fill;
+	}
+	
+	render(){
+		this.canvas.closePath();
+		this.canvas.stroke();
+	}
+	
+	drawLine(p1, p2, width){
+		if (width) this.canvas.lineWidth = width;
+		this.canvas.beginPath();
+		
+		this.canvas.moveTo(p1.x+0.5, p1.y+0.5);
+		this.canvas.lineTo(p2.x+0.5, p2.y+0.5);
+		
+		this.render();
+	}
+	drawLineTo(p, init, width){
+		if (init) this.init_point = init;
+		this.drawLine(this.init_point, p, width);
+		this.init_point = p;
+	}
+	drawLines(points, width){
+		if (!points.length) return;
+		
+		this.init_point = points[0];
+		
+		for (var i = 1; i < points.length; i++){
+			this.drawLineTo(points[i], null, width);
+		}
+	}
+	
+	drawRect(p1, p2){
+		this.canvas.beginPath();
+		this.canvas.fillRect(p1.x+0.5, p1.y+0.5, p2.x+0.5, p2.y+0.5);
+		this.render();
+	}
+	drawPoly(points, width){
+		points.push(points[0]);// close path
+		this.drawLines(points, width);
+	}
+	drawCircle(p, radius, width){
+		this.canvas.beginPath();
+		this.canvas.arc(p.x, p.y, radius, 0, 2 * Math.PI, false);
+		this.canvas.fill();
+		if (width) this.canvas.lineWidth = width;
+		this.render();
+	}
+	
+	drawText(text, p, font){
+		if (font) this.canvas.font = font;
+		this.canvas.fillText(text, p.x, p.y);
+	}
+	drawTexts(texts){
+		for (var i = 0; i < texts.length; i++){
+			let t = texts[i];
+			this.drawText(t[0], t[1], t[2]);
+		}
+	}
+}
+
+Canvas.Vector2 = __WEBPACK_IMPORTED_MODULE_0__vector2__["a" /* default */];
+/* harmony default export */ __webpack_exports__["a"] = (Canvas);
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class Vector2 {
+	constructor(x, y){
+		this.x = x || 0;
+		this.y = y || 0;
+	}
+	
+	static get zero(){
+		return new Vector2();
+	}
+	static get up(){
+		return new Vector2(0,1);
+	}
+	static get down(){
+		return new Vector2(0,-1);
+	}
+	static get left(){
+		return new Vector2(-1,0);
+	}
+	static get right(){
+		return new Vector2(1,0);
+	}
+	
+	clone(){
+		return new Vector2(this.x, this.y);
+	}
+	
+	check(v){
+		if (!v) return Vector2.zero;
+		if (v instanceof Array) return new Vector2(v[0], v[1]);
+		if (typeof v != 'object') return new Vector2(v, v);
+		return v;
+	}
+	
+	add(v){
+		v = this.check(v);
+		this.x += v.x;
+		this.y += v.y;
+		return this;
+	}
+	sub(v){
+		v = this.check(v);
+		this.x -= v.x;
+		this.y -= v.y;
+		return this;
+	}
+	mult(v){
+		v = this.check(v);
+		this.x *= v.x;
+		this.y *= v.y;
+		return this;
+	}
+	normalize(){
+		this.mult(1.0 / this.length);
+		return this;
+	}
+	
+	equals(v){
+		return this.x == v.x && this.y == v.y;
+	}
+	
+	get sqrLength(){
+		return this.x * this.x + this.y * this.y;
+	}
+	get length(){
+		return Math.sqrt(this.sqrLength);
+	}
+	
+	toString(){
+		return '(' + this.x + ', ' + this.y + ')';
+	}
+	
+	rotate(newAngle, center){
+		if (!center) center = Vector2.zero;
+		
+		this.sub(center);
+		let len = this.length;
+		
+		this.x = len * Math.cos( newAngle );
+		this.y = len * Math.sin( newAngle );
+		
+		this.add(center);
+		return this;
+	}
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (Vector2);
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {global.merge = function(o1, o2){
+	if (!o1) o1 = {};
+	var keys = Object.keys(o2 || {});
+	
+	for (var i = 0; i < keys.length; i++){
+		o1[keys[i]] = o2[keys[i]];
+	}
+	return o1;
+};
+
+var defaults = {
+	enabled: false,
+	enableKeys: true,
+	enableMouse: true,
+	enableTouch: true,
+	
+	keys: {
+		SPACE: 32,
+		UP: 38,
+		DOWN: 40,
+		LEFT: 37,
+		RIGHT: 39,
+		W: 87,
+		A: 65,
+		S: 83,
+		D: 68,
+		CTRL: false
+	},
+	mouse: {
+		LEFT: 0,
+		WHEEL: 1,
+		MIDDLE: 1,
+		RIGHT: 2
+	},
+	
+	handlers: {
+		keydown: 'onKeyDown',
+		keyup: 'onKeyUp',
+		
+		mousemove: 'onMouseMove',
+		mousedown: 'onMouseDown',
+		mouseup: 'onMouseUp',
+		click: 'onClick',
+		wheel: 'onMouseWheel',
+		contextmenu: 'onContextMenu',
+		
+		touchstart: 'onTouchStart',
+		touchend: 'onTouchEnd',
+		touchmove: 'onTouchMove',
+	}
+};
+
+class Controls
+{
+	constructor(renderer){
+		merge(this, defaults);
+		this.renderer = renderer;
+		
+		// Hook pointer lock state change events
+		document.addEventListener('pointerlockchange', (e) => this.onPointerLockingChange(e), false);
+		document.addEventListener('mozpointerlockchange', (e) => this.onPointerLockingChange(e), false);
+		document.addEventListener('webkitpointerlockchange', (e) => this.onPointerLockingChange(e), false);
+		
+		document.addEventListener('pointerlockerror', (e) => this.onPointerLockingError(e), false);
+		document.addEventListener('mozpointerlockerror', (e) => this.onPointerLockingError(e), false);
+		document.addEventListener('webkitpointerlockerror', (e) => this.onPointerLockingError(e), false);
+	}
+	
+	Bind(objects){
+		for (var name in objects){
+			let obj = objects[name];
+			
+			for (let eventName in this.handlers){
+				let handlerName = this.handlers[eventName];
+				
+				if (obj[handlerName]){
+					document.body.addEventListener(eventName, (e) => {
+						if (!this.enabled) return;
+						this.keys.CTRL = e.ctrlKey;
+						this.eventHandler(e, obj, handlerName);
+					}, false);
+				}
+			}
+		}
+		
+		global.addEventListener('resize', () => {
+			this.renderer.setSize();
+		}, false);
+	}
+	
+	eventHandler(e, obj, handlerName){
+		var handler = obj[handlerName].bind(obj);
+		
+		e.preventDefault();
+		e.stopPropagation();
+		
+		switch (handlerName){
+			case 'onKeyDown':
+			case 'onKeyUp':
+				if (!this.enableKeys) return;
+				return handler(e.keyCode);
+			
+			case 'onMouseMove':
+				if (!this.enableMouse) return;
+				return handler(
+					new THREE.Vector2(e.clientX, e.clientY),
+					new THREE.Vector2(
+						e.movementX || e.mozMovementX || e.webkitMovementX || 0,
+						e.movementY || e.mozMovementY || e.webkitMovementY || 0
+					)
+				);
+			
+			case 'onMouseWheel':
+				if (!this.enableMouse) return;
+				return handler(e.deltaY);
+			
+			case 'onClick':
+			case 'onMouseUp':
+			case 'onMouseDown':
+				if (!this.enableMouse) return;
+				return handler(e.button, new THREE.Vector2(e.clientX, e.clientY));
+			
+			case 'onTouchStart':
+			case 'onTouchMove':
+			case 'onTouchEnd':
+				if (!this.enableTouch) return;
+				let points = new Array(e.touches.length);
+				
+				for (var i = 0; i < points.length; i++){
+					points[i] = new THREE.Vector2(e.touches[i].pageX, e.touches[i].pageY);
+				}
+				
+				return handler(points);
+			
+			default:
+				return handler();
+		}
+	}
+	
+	onPointerLockingError(){}
+	onPointerLockingChange(){}
+	
+	// Ask the browser to lock the pointer
+	lockPointer(elem){
+		let lock = elem.requestPointerLock || elem.mozRequestPointerLock || elem.webkitRequestPointerLock;
+		lock && lock();
+	}
+	isPointerLocked(elem){
+		return document.pointerLockElement === elem || document.mozPointerLockElement === elem || document.webkitPointerLockElement === elem;
+	}
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Controls;
+
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+const PI = Math.PI;
+const PI_2 = PI / 2;
+const PIm2 = PI * 2;
+
+class Ship
+{
+	constructor(){
+		this.radius = 10;// for collisions
+		
+		this.velocity = new Vector2();
+		this.acceleration = 0.1;
+		this.angularVelocity = PI / 90;
+		
+		this.points = new Array(3);
+		this.offsets = [
+			{position: new Vector2(0, 10)},
+			{position: new Vector2(-5, -10)},
+			{position: new Vector2(5, -10)}
+		];
+		this.setOffsetsRotation();
+	}
+	
+	setOffsetsRotation(){
+		for (var i = 0; i < this.offsets.length; i++)
+		{
+			let offset = this.offsets[i];
+			let pos = offset.position;
+			offset.rotation = Math.acos(pos.x / pos.length);
+			
+			if (pos.x < 0) offset.rotation += PI_2;
+			if (pos.y < 0) offset.rotation = -offset.rotation;
+		}
+	}
+	
+	Start(objects){
+		this.oldPos = this.position = new Vector2(this.renderer.width / 2 - 100, this.renderer.height / 2);
+		this.oldAng = this.rotation = -PI_2;
+		this.controls.enabled = true;
+	}
+	
+	getPoint(offset){
+		let p = this.position.clone().add(offset.position);
+		p.rotate(this.rotation + offset.rotation, this.position);
+		return p;
+	}
+	
+	getPoints(){
+		let samePos = this.position.equals(this.oldPos);
+		let sameAng = this.rotation == this.oldAng;
+		
+		if (samePos && sameAng) return this.points;
+		
+		for (var i = 0; i < this.offsets.length; i++){
+			this.points[i] = this.getPoint(this.offsets[i]);
+		}
+		
+		this.oldPos = this.position.clone();
+		this.oldAng = this.rotation;
+		
+		return this.points;
+	}
+	
+	Update(){
+		if (this.isDestroyed) return;
+		this.position.add(this.velocity);
+	}
+	
+	render(){
+		if (this.isDestroyed) return;
+		this.renderer.setColor('white');
+		this.renderer.drawPoly(this.getPoints());
+	}
+	
+	destroy(){
+		this.isDestroyed = true;
+	}
+	
+	//------------------------------------- EVENTS
+	
+	onKeyDown(key){
+		switch (key) {
+			case this.controls.keys.UP:
+			case this.controls.keys.W:
+				this.velocity.add(Vector2.up.rotate(this.rotation).mult(this.acceleration));
+				break;
+			
+			case this.controls.keys.LEFT:
+			case this.controls.keys.A:
+				this.rotation -= this.angularVelocity;
+				if (this.rotation < -PI) this.rotation += PIm2;
+				break;
+			
+			case this.controls.keys.RIGHT:
+			case this.controls.keys.D:
+				this.rotation += this.angularVelocity;
+				if (this.rotation > PI) this.rotation -= PIm2;
+				break;
+		}
+	}
+}
+/* harmony export (immutable) */ __webpack_exports__["Ship"] = Ship;
+
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+class Star
+{
+	constructor(){
+		this.radius = 10;
+		this.mass = 1;
+		this.gravity = true;
+	}
+	
+	Start(objects){
+		this.position = new Vector2(this.renderer.width / 2, this.renderer.height / 2);
+		this.objects = [];
+		
+		for (var name in objects){
+			if (objects[name].velocity){
+				this.objects.push(objects[name]);
+			}
+		}
+	}
+	
+	Update(){
+		if (!this.gravity) return;
+		
+		var toDelete = [];
+		var obj, diff, distance, distanceDiff, direction, velocity;
+		
+		for (var i = 0; i < this.objects.length; i++){
+			obj = this.objects[i];
+			diff = this.position.clone().sub(obj.position);
+			distance = diff.length;
+			distanceDiff = distance - (this.radius + (obj.radius || 0));
+			
+			if (distanceDiff <= 0){
+				obj.destroy();
+				toDelete.push(i);
+				continue;
+			}
+			
+			direction = diff.clone().normalize();
+			velocity = direction.clone().mult(this.mass / distance);
+			
+			if (distanceDiff - velocity.length <= 0){// on the next frame
+				velocity = direction.clone().mult(distance - this.radius);
+			}
+			
+			obj.velocity.add(velocity);
+		}
+		
+		for (i = 0; i < toDelete.length; i++){
+			this.objects.splice(toDelete[i], 1);
+		}
+	}
+	
+	render(){
+		this.renderer.setColor('white');
+		this.renderer.drawCircle(this.position, this.radius);
+	}
+}
+/* harmony export (immutable) */ __webpack_exports__["Star"] = Star;
+
+
+
+/***/ })
+/******/ ]);
+//# sourceMappingURL=index.js.map
