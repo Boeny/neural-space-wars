@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,29 +95,144 @@ module.exports = g;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_canvas__ = __webpack_require__(2);
+var PI_2 = Math.PI / 2;
 
+class Vector2 {
+	constructor(x, y){
+		this.x = x || 0;
+		this.y = y || 0;
+	}
+	
+	static get zero(){
+		return new Vector2();
+	}
+	static get up(){
+		return new Vector2(0,1);
+	}
+	static get down(){
+		return new Vector2(0,-1);
+	}
+	static get left(){
+		return new Vector2(-1,0);
+	}
+	static get right(){
+		return new Vector2(1,0);
+	}
+	
+	static check(v){
+		if (!v) return Vector2.zero;
+		if (v instanceof Array) return new Vector2(v[0], v[1]);
+		if (typeof v != 'object') return new Vector2(v, v);
+		return v;
+	}
+	
+	static round(n, depth = 1000){
+		return Math.round(depth * n) / depth;
+	}
+	static roundVector(v, depth = 1000){
+		return v.clone().roundSelf(depth);
+	}
+	
+	roundSelf(depth){
+		return this.withSelf( (coo) => Vector2.round(coo, depth) );
+	}
+	
+	withSelf(forCoo = ()=>{}){
+		this.x = forCoo(this.x);
+		this.y = forCoo(this.y);
+		return this;
+	}
+	
+	clone(){
+		return new Vector2(this.x, this.y);
+	}
+	
+	add(v){
+		v = Vector2.check(v);
+		this.x += v.x;
+		this.y += v.y;
+		return this;
+	}
+	sub(v){
+		v = Vector2.check(v);
+		this.x -= v.x;
+		this.y -= v.y;
+		return this;
+	}
+	mult(v){
+		v = Vector2.check(v);
+		this.x *= v.x;
+		this.y *= v.y;
+		return this;
+	}
+	normalize(){
+		this.mult(1.0 / this.length);
+		return this;
+	}
+	
+	equals(v){
+		return this.x == v.x && this.y == v.y;
+	}
+	
+	get sqrLength(){
+		return this.x * this.x + this.y * this.y;
+	}
+	get length(){
+		return Math.sqrt(this.sqrLength);
+	}
+	
+	toString(){
+		return '(' + this.x + ', ' + this.y + ')';
+	}
+	
+	getAngle(){
+		let angle = Math.acos(this.x / this.length);
+		if (this.y < 0) angle = -angle;
+		return angle;
+	}
+	
+	setAngle(newAngle, center){
+		if (!center) center = Vector2.zero;
+		
+		this.sub(center);
+		let len = this.length;
+		
+		this.x = len * Math.cos(newAngle);
+		this.y = len * Math.sin(newAngle);
+		
+		this.add(center);
+		return this;
+	}
+}
 
-
-global.Vector2 = __WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].Vector2;
-
-__WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].ready(
-	[
-		__webpack_require__(6),
-		__webpack_require__(7)
-	],
-	0.5
-);
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+/* harmony default export */ __webpack_exports__["a"] = (Vector2);
 
 /***/ }),
 /* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__canvas__ = __webpack_require__(3);
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_canvas__ = __webpack_require__(3);
+
+
+
+
+__WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].ready(
+	[
+		__webpack_require__(6),
+		__webpack_require__(8)
+	],
+	0.5
+);
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__canvas__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__controls__ = __webpack_require__(5);
 
 
@@ -185,14 +300,11 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__vector2__ = __webpack_require__(4);
-
-
-class Canvas
+/* WEBPACK VAR INJECTION */(function(global) {class Canvas
 {
 	constructor(mult){
 		this.DOM = document.createElement('canvas');
@@ -299,8 +411,8 @@ class Canvas
 		this.render();
 	}
 	drawPoly(points, width){
-		points.push(points[0]);// close path
 		this.drawLines(points, width);
+		this.drawLineTo(points[0], null, width);// close path
 	}
 	drawCircle(p, radius, width){
 		this.canvas.beginPath();
@@ -321,103 +433,10 @@ class Canvas
 		}
 	}
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Canvas;
 
-Canvas.Vector2 = __WEBPACK_IMPORTED_MODULE_0__vector2__["a" /* default */];
-/* harmony default export */ __webpack_exports__["a"] = (Canvas);
 
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
-
-/***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-class Vector2 {
-	constructor(x, y){
-		this.x = x || 0;
-		this.y = y || 0;
-	}
-	
-	static get zero(){
-		return new Vector2();
-	}
-	static get up(){
-		return new Vector2(0,1);
-	}
-	static get down(){
-		return new Vector2(0,-1);
-	}
-	static get left(){
-		return new Vector2(-1,0);
-	}
-	static get right(){
-		return new Vector2(1,0);
-	}
-	
-	clone(){
-		return new Vector2(this.x, this.y);
-	}
-	
-	check(v){
-		if (!v) return Vector2.zero;
-		if (v instanceof Array) return new Vector2(v[0], v[1]);
-		if (typeof v != 'object') return new Vector2(v, v);
-		return v;
-	}
-	
-	add(v){
-		v = this.check(v);
-		this.x += v.x;
-		this.y += v.y;
-		return this;
-	}
-	sub(v){
-		v = this.check(v);
-		this.x -= v.x;
-		this.y -= v.y;
-		return this;
-	}
-	mult(v){
-		v = this.check(v);
-		this.x *= v.x;
-		this.y *= v.y;
-		return this;
-	}
-	normalize(){
-		this.mult(1.0 / this.length);
-		return this;
-	}
-	
-	equals(v){
-		return this.x == v.x && this.y == v.y;
-	}
-	
-	get sqrLength(){
-		return this.x * this.x + this.y * this.y;
-	}
-	get length(){
-		return Math.sqrt(this.sqrLength);
-	}
-	
-	toString(){
-		return '(' + this.x + ', ' + this.y + ')';
-	}
-	
-	rotate(newAngle, center){
-		if (!center) center = Vector2.zero;
-		
-		this.sub(center);
-		let len = this.length;
-		
-		this.x = len * Math.cos( newAngle );
-		this.y = len * Math.sin( newAngle );
-		
-		this.add(center);
-		return this;
-	}
-}
-
-/* harmony default export */ __webpack_exports__["a"] = (Vector2);
 
 /***/ }),
 /* 5 */
@@ -586,6 +605,11 @@ class Controls
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_figure__ = __webpack_require__(7);
+
+
+
 const PI = Math.PI;
 const PI_2 = PI / 2;
 const PIm2 = PI * 2;
@@ -593,59 +617,21 @@ const PIm2 = PI * 2;
 class Ship
 {
 	constructor(){
+		this.figure = new __WEBPACK_IMPORTED_MODULE_1_figure__["a" /* default */]([0, 10], [-5, -10], [5, -10]);
 		this.radius = 10;// for collisions
 		
-		this.velocity = new Vector2();
-		this.acceleration = 0.1;
-		this.angularVelocity = PI / 90;
-		
-		this.points = new Array(3);
-		this.offsets = [
-			{position: new Vector2(0, 10)},
-			{position: new Vector2(-5, -10)},
-			{position: new Vector2(5, -10)}
-		];
-		this.setOffsetsRotation();
-	}
-	
-	setOffsetsRotation(){
-		for (var i = 0; i < this.offsets.length; i++)
-		{
-			let offset = this.offsets[i];
-			let pos = offset.position;
-			offset.rotation = Math.acos(pos.x / pos.length);
-			
-			if (pos.x < 0) offset.rotation += PI_2;
-			if (pos.y < 0) offset.rotation = -offset.rotation;
-		}
+		this.velocity = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */]();
+		this.acceleration = __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */].up.mult(0.1);
+		this.angularVelocity = PI / 40;
 	}
 	
 	Start(objects){
-		this.oldPos = this.position = new Vector2(this.renderer.width / 2 - 100, this.renderer.height / 2);
-		this.oldAng = this.rotation = -PI_2;
 		this.controls.enabled = true;
-	}
-	
-	getPoint(offset){
-		let p = this.position.clone().add(offset.position);
-		p.rotate(this.rotation + offset.rotation, this.position);
-		return p;
-	}
-	
-	getPoints(){
-		let samePos = this.position.equals(this.oldPos);
-		let sameAng = this.rotation == this.oldAng;
 		
-		if (samePos && sameAng) return this.points;
+		this.position = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](this.renderer.width / 2 - 100, this.renderer.height / 2);
+		this.rotation = -PI;
 		
-		for (var i = 0; i < this.offsets.length; i++){
-			this.points[i] = this.getPoint(this.offsets[i]);
-		}
-		
-		this.oldPos = this.position.clone();
-		this.oldAng = this.rotation;
-		
-		return this.points;
+		this.figure.setPoints(this.position, this.rotation);
 	}
 	
 	Update(){
@@ -656,7 +642,7 @@ class Ship
 	render(){
 		if (this.isDestroyed) return;
 		this.renderer.setColor('white');
-		this.renderer.drawPoly(this.getPoints());
+		this.renderer.drawPoly(this.figure.getPoints(this.position, this.rotation));
 	}
 	
 	destroy(){
@@ -669,7 +655,7 @@ class Ship
 		switch (key) {
 			case this.controls.keys.UP:
 			case this.controls.keys.W:
-				this.velocity.add(Vector2.up.rotate(this.rotation).mult(this.acceleration));
+				this.velocity.add(this.acceleration.setAngle(this.rotation));
 				break;
 			
 			case this.controls.keys.LEFT:
@@ -695,17 +681,74 @@ class Ship
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(1);
+
+
+class Figure
+{
+	constructor(...points){
+		this.points = new Array(points.length);
+		this.setOffsets(points);
+	}
+	
+	setOffsets(points){
+		this.offsets = [];
+		let PI_2 = Math.PI / 2;
+		
+		for (var i = 0; i < points.length; i++)
+		{
+			let pos = __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */].check(points[i]);
+			
+			this.offsets.push({
+				position: pos,
+				rotation: pos.getAngle()
+			});
+		}
+	}
+	
+	getPoints(pos, rot){
+		if (!pos.equals(this.oldPos) || rot != this.oldAng){
+			this.setPoints(pos, rot);
+		}
+		return this.points;
+	}
+	
+	setPoints(pos, rot){
+		for (var i = 0; i < this.offsets.length; i++){
+			this.points[i] = this.setPoint(this.offsets[i], pos, rot);
+		}
+		this.oldPos = pos.clone();
+		this.oldAng = rot;
+	}
+	
+	setPoint(offset, pos, rot){
+		let p = offset.position.clone();
+		p.setAngle(rot + offset.rotation);
+		return p.add(pos);
+	}
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Figure;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(1);
+
+
 class Star
 {
 	constructor(){
 		this.radius = 10;
 		this.mass = 1;
-		this.gravity = true;
+		this.gravity = false;
 	}
 	
 	Start(objects){
-		this.position = new Vector2(this.renderer.width / 2, this.renderer.height / 2);
+		this.position = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](this.renderer.width / 2, this.renderer.height / 2);
 		this.objects = [];
 		
 		for (var name in objects){

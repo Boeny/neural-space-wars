@@ -1,9 +1,11 @@
+import Vector2 from 'vector2';
+
 export class Star
 {
 	constructor(){
 		this.radius = 10;
 		this.mass = 1;
-		this.gravity = true;
+		this.gravity = false;
 	}
 	
 	Start(objects){

@@ -1,16 +1,16 @@
 {
   "name": "neural-space-wars",
   "version": "0.0.1",
-  "description": "classic Space Wars with brainjs\u001b[D\u001b[Ds.d\u001b[D\u001b[D\u001b[D.\u001b[2~j\u001b[2~ff\u001b[D\u001b[Dd\u001b[2ff\u001b[D\u001b[Df\u001b[ddf\u001b[D\u001b[D\u001b[D0\u001b[2js",
+  "description": "classic Space Wars with brain.js",
   "scripts": {
     "dev": "webpack --env=dev",
     "server": "webpack-dev-server --env=server --open",
     "prod": "webpack --env=prod",
-    "pages": "webpack --env=gitpages"
+    "pages": "webpack --env=gitpages",
+    "test": "mocha test.js"
   },
   "keywords": [
-    "space-wars\u001b[D\u001b[D\u001b[D\u001b[",
-    "\u001b[C\u001b[C\u001b[C\u001b[C",
+    "space-wars",
     "brain",
     "neural"
   ],
