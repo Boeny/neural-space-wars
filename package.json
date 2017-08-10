@@ -8,7 +8,7 @@
     "prod": "webpack --env=prod",
     "pages": "webpack --env=gitpages",
     "test:build": "webpack --env=test",
-    "test": "npm run test:build -- mocha test/test.js"
+    "test": "mocha test/test.js"
   },
   "keywords": [
     "space-wars",
