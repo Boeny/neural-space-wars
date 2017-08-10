@@ -65,33 +65,6 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 1 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -106,6 +79,10 @@ class Vector2 {
 	static get zero(){
 		return new Vector2();
 	}
+	get isZero(){
+		return this.equals(Vector2.zero);
+	}
+	
 	static get up(){
 		return new Vector2(0,1);
 	}
@@ -119,12 +96,7 @@ class Vector2 {
 		return new Vector2(1,0);
 	}
 	
-	static check(v){
-		if (!v) return Vector2.zero;
-		if (v instanceof Array) return new Vector2(v[0], v[1]);
-		if (typeof v != 'object') return new Vector2(v, v);
-		return v;
-	}
+	//---------------------------------- ROUND
 	
 	static round(n, depth = 1000){
 		return Math.round(depth * n) / depth;
@@ -137,6 +109,8 @@ class Vector2 {
 		return this.withSelf( (coo) => Vector2.round(coo, depth) );
 	}
 	
+	//---------------------------------- OPERATIONS
+	
 	withSelf(forCoo = ()=>{}){
 		this.x = forCoo(this.x);
 		this.y = forCoo(this.y);
@@ -145,6 +119,13 @@ class Vector2 {
 	
 	clone(){
 		return new Vector2(this.x, this.y);
+	}
+	
+	static check(v){
+		if (!v) return Vector2.zero;
+		if (v instanceof Array) return new Vector2(v[0], v[1]);
+		if (typeof v != 'object') return new Vector2(v, v);
+		return v;
 	}
 	
 	add(v){
@@ -170,7 +151,22 @@ class Vector2 {
 		return this;
 	}
 	
-	equals(v){
+	//---------------------------------- OTHER
+	
+	static isNumInRange(n, min, max){
+		return n > min && n < max;
+	}
+	
+	inRange(v, radius){
+		return Vector2.isNumInRange(this.x, v.x - radius, v.x + radius) &&
+			Vector2.isNumInRange(this.y, v.y - radius, v.y + radius);
+	}
+	
+	equals(v, depth){
+		if (depth !== undefined){
+			return Vector2.roundVector(this, depth)
+				.equals( Vector2.roundVector(v, depth) );
+		}
 		return this.x == v.x && this.y == v.y;
 	}
 	
@@ -208,6 +204,33 @@ class Vector2 {
 /* harmony default export */ __webpack_exports__["a"] = (Vector2);
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
 /* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -223,7 +246,8 @@ __WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].ready(
 		__webpack_require__(6),
 		__webpack_require__(8)
 	],
-	0.5
+	0.5,
+	true// use decart system with (0,0) in the middle of the screen
 );
 
 
@@ -237,50 +261,79 @@ __WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].ready(
 
 
 
-/**
- * @prop {Array} models [ {className: class}, ... ]
- * @prop {Number} width of the canvas
- * @prop {Number} height of the canvas
- */
-__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models, multiplier){
+function obj_key(obj, i = 0){
+	return Object.keys(obj)[i];
+}
+
+__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].createObjects = function(models){
 	if (!models) return;
 	
 	var objects = {};
 	
-	for (var i = 0; i < models.length; i++){
-		let obj = models[i];// {className: class}
-		let className = Object.keys(obj)[0];
-		objects[className.toLowerCase()] = new obj[className]();
+	if (models instanceof Array){
+		for (var i = 0; i < models.length; i++)
+		{
+			let obj = models[i];// {className: class}
+			let className = obj_key(obj);
+			objects[className.toLowerCase()] = new obj[className]();
+		}
+	}
+	else{
+		for (var name in models)
+		{
+			let obj = models[name];// {className: class}
+			objects[name] = new obj[obj_key(obj)]();
+		}
 	}
 	
-	global.onload = function(){
-		var renderer = new __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */](multiplier);
-		var updates = [];
-		var controls = new __WEBPACK_IMPORTED_MODULE_1__controls__["a" /* default */](renderer);
+	return objects;
+};
+
+__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].setObjectsEnv = function(objects, useDecart, multiplier, updates){
+	var renderer = new __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */](multiplier, !!updates);
+	if (useDecart) renderer.useDecart = true;
+	
+	var controls = new __WEBPACK_IMPORTED_MODULE_1__controls__["a" /* default */](renderer);
+	
+	for (var name in objects){
+		let obj = objects[name];
+		obj.renderer = renderer;
+		obj.controls = controls;
 		
-		for (var name in objects){
-			let obj = objects[name];
-			obj.renderer = renderer;
-			obj.controls = controls;
+		if (obj.Start) obj.Start(objects);
+		
+		if (updates && (obj.render || obj.Update)){
+			let upd;
 			
-			if (obj.Start) obj.Start(objects);
+			if (obj.render && !obj.Update) upd = obj.render.bind(obj);
 			
-			if (obj.render || obj.Update){
-				let upd;
-				
-				if (obj.render && !obj.Update) upd = obj.render.bind(obj);
-				
-				if (!obj.render && obj.Update) upd = obj.Update.bind(obj);
-				
-				if (obj.render && obj.Update) upd = () => {
-					obj.Update();
-					obj.render();
-				};
-				
-				updates.push(upd);
-				if (obj.render) obj.render();
-			}
+			if (!obj.render && obj.Update) upd = obj.Update.bind(obj);
+			
+			if (obj.render && obj.Update) upd = () => {
+				obj.Update();
+				obj.render();
+			};
+			
+			updates.push(upd);
+			
+			if (obj.render) obj.render();
 		}
+	}
+	
+	return {renderer, controls};
+};
+
+/**
+ * @prop {Array} models [ {className: class}, ... ]
+ * @prop {Number} multiplier of the size of the canvas
+ * @prop {boolean} if use decart system with (0,0) in the middle of the screen
+ */
+__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models, multiplier, useDecart){
+	var objects = __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].createObjects(models);
+	
+	global.onload = function(){
+		var updates = [];
+		var {renderer, controls} = __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].setObjectsEnv(objects, useDecart, multiplier, updates);
 		
 		controls.Bind(objects);
 		
@@ -297,40 +350,48 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 
 /* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */]);
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
 
 /***/ }),
 /* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {class Canvas
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(0);
+
+
+class Canvas
 {
-	constructor(mult){
+	constructor(mult = 1, addToPage){
+		this.DOM = {};
+		this.multiplier = mult;
+		if (addToPage) this.createDOM();
+		this.setSize();
+		this.useDecart = false;
+	}
+	
+	createDOM(){
 		this.DOM = document.createElement('canvas');
 		document.body.appendChild(this.DOM);
-		
-		this.multiplier = mult;
-		this.setSize();
-		
 		this.canvas = this.DOM.getContext('2d');
 	}
 	
 	setSize(){
 		this.DOM.width = this.multiplier * global.innerWidth;
 		this.DOM.height = this.multiplier * global.innerHeight;
-	}
-	
-	get width(){
-		return this.DOM.width;
-	}
-	get height(){
-		return this.DOM.height;
+		
+		this.width = this.DOM.width;
+		this.height = this.DOM.height;
+		
+		this.width2 = this.width / 2;
+		this.height2 = this.height / 2;
 	}
 	
 	addEvent(event, handler){
 		this.DOM.addEventListener(event, handler);
 	}
+	
+	//-------------------------------------- IMAGE DATA
 	
 	createData(w,h){
 		return this.canvas.createImageData(w || this.width, h || this.height);
@@ -367,7 +428,12 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 		this.setColorAtIndex(p,i,c);
 	}
 	
-	//--------------------------------------
+	//-------------------------------------- DRAWING
+	
+	decart(p){
+		if (!this.useDecart) return p;
+		return new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](p.x - this.width2, this.height2 - p.y);
+	}
 	
 	setColor(color){
 		if (!color) return;
@@ -382,6 +448,9 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 	}
 	
 	drawLine(p1, p2, width){
+		p1 = this.decart(p1);
+		p2 = this.decart(p2);
+		
 		if (width) this.canvas.lineWidth = width;
 		this.canvas.beginPath();
 		
@@ -406,6 +475,9 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 	}
 	
 	drawRect(p1, p2){
+		p1 = this.decart(p1);
+		p2 = this.decart(p2);
+		
 		this.canvas.beginPath();
 		this.canvas.fillRect(p1.x+0.5, p1.y+0.5, p2.x+0.5, p2.y+0.5);
 		this.render();
@@ -415,6 +487,8 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 		this.drawLineTo(points[0], null, width);// close path
 	}
 	drawCircle(p, radius, width){
+		p = this.decart(p);
+		
 		this.canvas.beginPath();
 		this.canvas.arc(p.x, p.y, radius, 0, 2 * Math.PI, false);
 		this.canvas.fill();
@@ -423,6 +497,7 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 	}
 	
 	drawText(text, p, font){
+		p = this.decart(p);
 		if (font) this.canvas.font = font;
 		this.canvas.fillText(text, p.x, p.y);
 	}
@@ -436,14 +511,17 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 /* harmony export (immutable) */ __webpack_exports__["a"] = Canvas;
 
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
 
 /***/ }),
 /* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {global.merge = function(o1, o2){
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(0);
+
+
+function merge(o1, o2){
 	if (!o1) o1 = {};
 	var keys = Object.keys(o2 || {});
 	
@@ -451,7 +529,11 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models
 		o1[keys[i]] = o2[keys[i]];
 	}
 	return o1;
-};
+}
+
+function in_array(e, arr){
+	return arr.indexOf(e) > -1;
+}
 
 var defaults = {
 	enabled: false,
@@ -500,15 +582,6 @@ class Controls
 	constructor(renderer){
 		merge(this, defaults);
 		this.renderer = renderer;
-		
-		// Hook pointer lock state change events
-		document.addEventListener('pointerlockchange', (e) => this.onPointerLockingChange(e), false);
-		document.addEventListener('mozpointerlockchange', (e) => this.onPointerLockingChange(e), false);
-		document.addEventListener('webkitpointerlockchange', (e) => this.onPointerLockingChange(e), false);
-		
-		document.addEventListener('pointerlockerror', (e) => this.onPointerLockingError(e), false);
-		document.addEventListener('mozpointerlockerror', (e) => this.onPointerLockingError(e), false);
-		document.addEventListener('webkitpointerlockerror', (e) => this.onPointerLockingError(e), false);
 	}
 	
 	Bind(objects){
@@ -531,13 +604,24 @@ class Controls
 		global.addEventListener('resize', () => {
 			this.renderer.setSize();
 		}, false);
+		
+		// Hook pointer lock state change events
+		document.addEventListener('pointerlockchange', (e) => this.onPointerLockingChange(e), false);
+		document.addEventListener('mozpointerlockchange', (e) => this.onPointerLockingChange(e), false);
+		document.addEventListener('webkitpointerlockchange', (e) => this.onPointerLockingChange(e), false);
+		
+		document.addEventListener('pointerlockerror', (e) => this.onPointerLockingError(e), false);
+		document.addEventListener('mozpointerlockerror', (e) => this.onPointerLockingError(e), false);
+		document.addEventListener('webkitpointerlockerror', (e) => this.onPointerLockingError(e), false);
 	}
 	
 	eventHandler(e, obj, handlerName){
 		var handler = obj[handlerName].bind(obj);
 		
-		e.preventDefault();
-		e.stopPropagation();
+		if (!in_array(handlerName, ['onTouchStart','onTouchMove','onTouchEnd'])){
+			e.preventDefault();
+			e.stopPropagation();
+		}
 		
 		switch (handlerName){
 			case 'onKeyDown':
@@ -548,8 +632,8 @@ class Controls
 			case 'onMouseMove':
 				if (!this.enableMouse) return;
 				return handler(
-					new THREE.Vector2(e.clientX, e.clientY),
-					new THREE.Vector2(
+					new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](e.clientX, e.clientY),
+					new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](
 						e.movementX || e.mozMovementX || e.webkitMovementX || 0,
 						e.movementY || e.mozMovementY || e.webkitMovementY || 0
 					)
@@ -563,7 +647,7 @@ class Controls
 			case 'onMouseUp':
 			case 'onMouseDown':
 				if (!this.enableMouse) return;
-				return handler(e.button, new THREE.Vector2(e.clientX, e.clientY));
+				return handler(e.button, new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](e.clientX, e.clientY));
 			
 			case 'onTouchStart':
 			case 'onTouchMove':
@@ -572,7 +656,7 @@ class Controls
 				let points = new Array(e.touches.length);
 				
 				for (var i = 0; i < points.length; i++){
-					points[i] = new THREE.Vector2(e.touches[i].pageX, e.touches[i].pageY);
+					points[i] = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](e.touches[i].pageX, e.touches[i].pageY);
 				}
 				
 				return handler(points);
@@ -597,7 +681,7 @@ class Controls
 /* harmony export (immutable) */ __webpack_exports__["a"] = Controls;
 
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
 
 /***/ }),
 /* 6 */
@@ -605,7 +689,7 @@ class Controls
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_figure__ = __webpack_require__(7);
 
 
@@ -616,37 +700,90 @@ const PIm2 = PI * 2;
 
 class Ship
 {
+	// before components are added
 	constructor(){
 		this.figure = new __WEBPACK_IMPORTED_MODULE_1_figure__["a" /* default */]([0, 10], [-5, -10], [5, -10]);
 		this.radius = 10;// for collisions
 		
 		this.velocity = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */]();
 		this.acceleration = __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */].up.mult(0.1);
-		this.angularVelocity = PI / 40;
+		this.angularVelocity = PI / 20;
+		
+		this.isDestroyed = false;
 	}
 	
+	// after renderer and controls have created but before they are added to the scene
 	Start(objects){
 		this.controls.enabled = true;
 		
-		this.position = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](this.renderer.width / 2 - 100, this.renderer.height / 2);
-		this.rotation = -PI;
+		this.position = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](- 100, 0);
+		this.rotation = 0;
 		
 		this.figure.setPoints(this.position, this.rotation);
 	}
 	
-	Update(){
-		if (this.isDestroyed) return;
-		this.position.add(this.velocity);
-	}
-	
+	// after Start and every frame
 	render(){
 		if (this.isDestroyed) return;
 		this.renderer.setColor('white');
-		this.renderer.drawPoly(this.figure.getPoints(this.position, this.rotation));
+		this.renderer.drawPoly(this.figure.points);
+		
+		this.renderer.setColor('yellow');
+		this.renderer.drawLine(this.position, this.position.clone().add(this.velocity.clone().mult(50)));
+		
+		this.renderer.setColor('red');
+		this.renderer.drawLine(this.position, this.position.clone().add(__WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */].up.setAngle(this.rotation).mult(10)));
 	}
+	
+	// after render
+	Update(){
+		if (this.isDestroyed) return;
+		
+		if (this.target){
+			if (this.rotation != this.target.rotation){
+				this.rotate(this.rotation > this.target.rotation);
+			}
+			if (!this.position.inRange(this.target.position, 10)){
+				this.velocity.add(this.acceleration.mult( Math.cos(this.target.rotation) ));
+			}
+		}
+		
+		this.position.add(this.velocity);
+		this.figure.updatePoints(this.position, this.rotation);
+	}
+	
+	//------------------------------------- METHODS
 	
 	destroy(){
 		this.isDestroyed = true;
+	}
+	
+	incVelocity(){
+		this.velocity.add(this.acceleration.setAngle(this.rotation));
+	}
+	
+	rotate(clockwise){
+		if (clockwise){
+			this.rotation -= this.angularVelocity;
+			if (this.rotation < -PI) this.rotation += PIm2;
+		}
+		else{
+			this.rotation += this.angularVelocity;
+			if (this.rotation > PI) this.rotation -= PIm2;
+		}
+	}
+	
+	moveTo(p){
+		if (!p) return this.setArrived();
+		
+		this.target = {
+			position: p,
+			rotation: p.clone().sub(this.position).getAngle()
+		}
+	}
+	
+	setArrived(){
+		this.target = null;
 	}
 	
 	//------------------------------------- EVENTS
@@ -655,21 +792,31 @@ class Ship
 		switch (key) {
 			case this.controls.keys.UP:
 			case this.controls.keys.W:
-				this.velocity.add(this.acceleration.setAngle(this.rotation));
+				this.incVelocity();
 				break;
 			
 			case this.controls.keys.LEFT:
 			case this.controls.keys.A:
-				this.rotation -= this.angularVelocity;
-				if (this.rotation < -PI) this.rotation += PIm2;
+				this.rotate(false);
 				break;
 			
 			case this.controls.keys.RIGHT:
 			case this.controls.keys.D:
-				this.rotation += this.angularVelocity;
-				if (this.rotation > PI) this.rotation -= PIm2;
+				this.rotate(true);
 				break;
 		}
+	}
+	
+	onTouchStart(points){
+		this.moveTo(points[0]);
+	}
+	
+	onTouchMove(points){
+		this.moveTo(points[0]);
+	}
+	
+	onTouchEnd(){
+		this.setArrived();
 	}
 }
 /* harmony export (immutable) */ __webpack_exports__["Ship"] = Ship;
@@ -681,7 +828,7 @@ class Ship
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(0);
 
 
 class Figure
@@ -706,7 +853,7 @@ class Figure
 		}
 	}
 	
-	getPoints(pos, rot){
+	updatePoints(pos, rot){
 		if (!pos.equals(this.oldPos) || rot != this.oldAng){
 			this.setPoints(pos, rot);
 		}
@@ -736,19 +883,21 @@ class Figure
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(0);
 
 
 class Star
 {
+	// before components are added
 	constructor(){
 		this.radius = 10;
 		this.mass = 1;
 		this.gravity = false;
 	}
 	
+	// after renderer and controls have created but before they are added to the scene
 	Start(objects){
-		this.position = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](this.renderer.width / 2, this.renderer.height / 2);
+		this.position = new __WEBPACK_IMPORTED_MODULE_0_vector2__["a" /* default */](0, 0);
 		this.objects = [];
 		
 		for (var name in objects){
@@ -758,6 +907,13 @@ class Star
 		}
 	}
 	
+	// after Start and every frame
+	render(){
+		this.renderer.setColor('white');
+		this.renderer.drawCircle(this.position, this.radius);
+	}
+	
+	// after render
 	Update(){
 		if (!this.gravity) return;
 		
@@ -789,11 +945,6 @@ class Star
 		for (i = 0; i < toDelete.length; i++){
 			this.objects.splice(toDelete[i], 1);
 		}
-	}
-	
-	render(){
-		this.renderer.setColor('white');
-		this.renderer.drawCircle(this.position, this.radius);
 	}
 }
 /* harmony export (immutable) */ __webpack_exports__["Star"] = Star;

@@ -2,14 +2,16 @@ import Vector2 from 'vector2';
 
 export class Star
 {
+	// before components are added
 	constructor(){
 		this.radius = 10;
 		this.mass = 1;
 		this.gravity = false;
 	}
 	
+	// after renderer and controls have created but before they are added to the scene
 	Start(objects){
-		this.position = new Vector2(this.renderer.width / 2, this.renderer.height / 2);
+		this.position = new Vector2(0, 0);
 		this.objects = [];
 		
 		for (var name in objects){
@@ -19,6 +21,13 @@ export class Star
 		}
 	}
 	
+	// after Start and every frame
+	render(){
+		this.renderer.setColor('white');
+		this.renderer.drawCircle(this.position, this.radius);
+	}
+	
+	// after render
 	Update(){
 		if (!this.gravity) return;
 		
@@ -50,10 +59,5 @@ export class Star
 		for (i = 0; i < toDelete.length; i++){
 			this.objects.splice(toDelete[i], 1);
 		}
-	}
-	
-	render(){
-		this.renderer.setColor('white');
-		this.renderer.drawCircle(this.position, this.radius);
 	}
 }
