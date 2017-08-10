@@ -237,15 +237,19 @@ module.exports = g;
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_canvas__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ship__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__star__ = __webpack_require__(8);
+
+
 
 
 
 
 __WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].ready(
-	[
-		__webpack_require__(6),
-		__webpack_require__(8)
-	],
+	{
+		ship: new __WEBPACK_IMPORTED_MODULE_1__ship__["a" /* default */](),
+		star: new __WEBPACK_IMPORTED_MODULE_2__star__["a" /* default */]()
+	},
 	0.5,
 	true// use decart system with (0,0) in the middle of the screen
 );
@@ -261,39 +265,20 @@ __WEBPACK_IMPORTED_MODULE_0_canvas__["a" /* default */].ready(
 
 
 
-function obj_key(obj, i = 0){
-	return Object.keys(obj)[i];
-}
-
-__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].createObjects = function(models){
-	if (!models) return;
-	
-	var objects = {};
-	
-	if (models instanceof Array){
-		for (var i = 0; i < models.length; i++)
-		{
-			let obj = models[i];// {className: class}
-			let className = obj_key(obj);
-			objects[className.toLowerCase()] = new obj[className]();
-		}
-	}
-	else{
-		for (var name in models)
-		{
-			let obj = models[name];// {className: class}
-			objects[name] = new obj[obj_key(obj)]();
-		}
-	}
-	
-	return objects;
-};
-
+/**
+ * @prop {Object} objects {name1: object1, name2: ...}
+ * @prop {boolean} useDecart - if use decart system with (0,0) in the middle of the screen
+ * @prop {Number} multiplier of the size of the canvas
+ * @prop {Array/undefined} updates will be filled with the "Update" or "render" methods of each object or both
+ *                                 if not set, the objects won't be rendered (and canvas will not be added)
+ * 
+ * @returns {renderer, controls}
+ */
 __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].setObjectsEnv = function(objects, useDecart, multiplier, updates){
 	var renderer = new __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */](multiplier, !!updates);
-	if (useDecart) renderer.useDecart = true;
-	
 	var controls = new __WEBPACK_IMPORTED_MODULE_1__controls__["a" /* default */](renderer);
+	
+	if (useDecart) renderer.useDecart = true;
 	
 	for (var name in objects){
 		let obj = objects[name];
@@ -302,6 +287,7 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].setObjectsEnv = functio
 		
 		if (obj.Start) obj.Start(objects);
 		
+		// if there is not updates array
 		if (updates && (obj.render || obj.Update)){
 			let upd;
 			
@@ -324,19 +310,20 @@ __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].setObjectsEnv = functio
 };
 
 /**
- * @prop {Array} models [ {className: class}, ... ]
+ * @prop {Object} objects {name1: object1, name2: ...}
  * @prop {Number} multiplier of the size of the canvas
- * @prop {boolean} if use decart system with (0,0) in the middle of the screen
+ * @prop {boolean} useDecart - if use decart system with (0,0) in the middle of the screen
  */
-__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(models, multiplier, useDecart){
-	var objects = __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].createObjects(models);
-	
+__WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].ready = function(objects, multiplier, useDecart){
 	global.onload = function(){
+		// add renderer and controls as components of the objects
 		var updates = [];
 		var {renderer, controls} = __WEBPACK_IMPORTED_MODULE_0__canvas__["a" /* default */].setObjectsEnv(objects, useDecart, multiplier, updates);
 		
+		// bind mouse, keys and touch events to the objects
 		controls.Bind(objects);
 		
+		// main cycle
 		(function render(){
 			requestAnimationFrame(render);
 			renderer.clear();
@@ -688,7 +675,6 @@ class Controls
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_figure__ = __webpack_require__(7);
 
@@ -819,7 +805,7 @@ class Ship
 		this.setArrived();
 	}
 }
-/* harmony export (immutable) */ __webpack_exports__["Ship"] = Ship;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Ship;
 
 
 
@@ -882,7 +868,6 @@ class Figure
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vector2__ = __webpack_require__(0);
 
 
@@ -947,7 +932,7 @@ class Star
 		}
 	}
 }
-/* harmony export (immutable) */ __webpack_exports__["Star"] = Star;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Star;
 
 
 

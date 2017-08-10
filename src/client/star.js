@@ -1,6 +1,6 @@
 import Vector2 from 'vector2';
 
-export class Star
+export default class Star
 {
 	// before components are added
 	constructor(){

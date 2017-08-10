@@ -5,7 +5,7 @@ const PI = Math.PI;
 const PI_2 = PI / 2;
 const PIm2 = PI * 2;
 
-export class Ship
+export default class Ship
 {
 	// before components are added
 	constructor(){
